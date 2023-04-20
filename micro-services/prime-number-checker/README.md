@@ -5,7 +5,12 @@
 * Port number to run on -> 9010
 * Service registry address and port -> localhost:9001
 > Environment variables from DOT ENV (.env) will be used if parameters are not passed or missing
-###### Start server using
+
+###### Start server using environment variables
+```
+npm start
+```
+###### Start server using parameters
 ```
 npm start 9010 localhost:9001
 ```
