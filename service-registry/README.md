@@ -1,6 +1,6 @@
 # Service Registry
 
-###### Use Node 12
+###### Use Node 14
 ###### Start server using
 ```
 npm start
