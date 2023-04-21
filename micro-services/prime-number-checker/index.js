@@ -5,7 +5,7 @@ const app = express();
 const BodyParser = require('body-parser');
 const Routes = require('./app-routes');
 const ParamExtractor = require('./helpers/param-extractor');
-const ServiceRegistry = require('./helpers/service-registry');
+const ServiceRegistry = require('./controllers/service-registry');
 
 // READ ENV and set defaults
 var PORT_NO = process.env.DEFAULT_PORT_NO;

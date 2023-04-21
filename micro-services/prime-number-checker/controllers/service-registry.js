@@ -1,4 +1,4 @@
-const HTTP = require('./http-client');
+const HTTP = require('../helpers/http-client');
 
 var ServiceRegistry = function () {
 
