@@ -6,6 +6,7 @@ const BodyParser = require('body-parser');
 const Routes = require('./app-routes');
 const ParamExtractor = require('./helpers/param-extractor');
 const ServiceRegistry = require('./controllers/service-registry');
+const Election = require('./controllers/election');
 const RuntimeDB = require('./schema/runtime-schema');
 
 // READ ENV and set defaults
@@ -50,7 +51,11 @@ app.listen(PORT_NO, (err) => {
     ServiceRegistry.registerNode(RuntimeDB.SERVICE_REGISTRY_URL, RuntimeDB.NODE_NAME, BASE_URL, PORT_NO)
         .then(() => {
             console.log('Node registered successfully!');
-            updateRegistry();
+            updateRegistry().then(() => {
+                // hold election
+                // TODO: change place later
+                Election.startElection();
+            });
         })
         .catch((err) => {
             console.log('Error while registering node. Please re-try!');
@@ -60,13 +65,14 @@ app.listen(PORT_NO, (err) => {
     // continuously fetch the registry for updates
     function updateRegistry() {
         console.log('Updating service registry list...');
-        ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((data) => {
+        return ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((data) => {
             if (data) {
                 RuntimeDB.SERVICE_REG_LIST = data;
             }
         });
     }
-    
+
+    // keep updating the registry
     var updateRegSubscription = setInterval(updateRegistry, 5000);
     // clearInterval(updateRegSubscription); // use this to stop the loop if necessary anywhere
 });

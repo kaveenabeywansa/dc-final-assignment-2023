@@ -40,6 +40,18 @@ var Controller = function () {
             }
         });
     };
+
+    // deregister inactive nodes
+    this.deregisterNodes = (reqBody) => {
+        return new Promise((resolve, reject) => {
+            try {
+                ServiceRegistry.removeNodes(reqBody.nodesToRemove);
+                resolve({ status: 200, message: "Successfully De-registered!" });
+            } catch (error) {
+                reject({ status: 500, message: "Error: " + error });
+            }
+        });
+    };
 };
 
 module.exports = new Controller();

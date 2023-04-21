@@ -12,7 +12,6 @@ var Broadcaster = function () {
         });
 
         return Promise.all(reqPromList).then((data) => {
-            console.log(data);
             Promise.resolve(data);
         }).catch((err) => {
             console.log(err);

@@ -21,4 +21,13 @@ module.exports = class ServiceRegistry {
         });
         return true;
     }
+
+    static removeNodes(nodeList) {
+        nodeList.forEach(element => {
+            let indx = this.registry.findIndex(_regItm => _regItm.nodeName == element);
+            if (indx >= 0) {
+                this.registry.splice(indx, 1);
+            }
+        });
+    }
 }
