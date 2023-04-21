@@ -28,6 +28,18 @@ var Controller = function () {
             }
         })
     };
+
+    // update the leader node
+    this.updateLeaderNode = (reqBody) => {
+        return new Promise((resolve, reject) => {
+            try {
+                ServiceRegistry.updateLeader(reqBody.name);
+                resolve({ status: 200, message: "Successfully Updated!" });
+            } catch (error) {
+                reject({ status: 500, message: "Error: " + error });
+            }
+        });
+    };
 };
 
 module.exports = new Controller();

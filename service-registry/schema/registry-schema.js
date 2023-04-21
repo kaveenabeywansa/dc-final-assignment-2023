@@ -10,7 +10,15 @@ module.exports = class ServiceRegistry {
         return this.registry.push({
             nodeName: name,
             ipAddress: address,
-            portNumber: port
+            portNumber: port,
+            isLeader: false
         });
+    }
+
+    static updateLeader(nodeName) {
+        this.registry.forEach(elInstance => {
+            elInstance.isLeader = (elInstance.nodeName == nodeName);
+        });
+        return true;
     }
 }

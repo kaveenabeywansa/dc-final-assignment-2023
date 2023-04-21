@@ -20,5 +20,14 @@ router.get('/', (req, res) => {
         res.status(err.status).send({ message: err.message });
     });
 });
+// update leader node
+router.post('/updateleader', (req, res) => {
+    console.log('updating leader node...');
+    Controller.updateLeaderNode(req.body).then((data) => {
+        res.status(data.status).send({ message: data.message });
+    }).catch((err) => {
+        res.status(err.status).send({ message: err.message });
+    });
+});
 
 module.exports = router;
