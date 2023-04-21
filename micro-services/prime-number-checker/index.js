@@ -6,15 +6,16 @@ const BodyParser = require('body-parser');
 const Routes = require('./app-routes');
 const ParamExtractor = require('./helpers/param-extractor');
 const ServiceRegistry = require('./controllers/service-registry');
+const RuntimeDB = require('./schema/runtime-schema');
 
 // READ ENV and set defaults
 var PORT_NO = process.env.DEFAULT_PORT_NO;
-var SERVICE_REGISTRY_URL = process.env.SERVICE_REGISTRY_URL;
 var BASE_URL = process.env.BASE_URL;
+RuntimeDB.SERVICE_REGISTRY_URL = process.env.SERVICE_REGISTRY_URL;
 
 // global variables
-var NODE_NAME = ServiceRegistry.generateNodeName();
-var SERVICE_REG_LIST = [];
+RuntimeDB.NODE_NAME = ServiceRegistry.generateNodeName();
+RuntimeDB.SERVICE_REG_LIST = [];
 
 // run setup and configs
 try {
@@ -23,12 +24,12 @@ try {
     // set variables
     if (argsList) {
         PORT_NO = argsList.portNumber ? argsList.portNumber : PORT_NO;
-        SERVICE_REGISTRY_URL = argsList.SERVICE_REGISTRY_URL ? argsList.SERVICE_REGISTRY_URL : SERVICE_REGISTRY_URL;
+        RuntimeDB.SERVICE_REGISTRY_URL = argsList.SERVICE_REGISTRY_URL ? argsList.SERVICE_REGISTRY_URL : RuntimeDB.SERVICE_REGISTRY_URL;
     }
 
-    console.log('Node Name', NODE_NAME);
+    console.log('Node Name', RuntimeDB.NODE_NAME);
     console.log('Port No:', PORT_NO);
-    console.log('Service Registry:', SERVICE_REGISTRY_URL);
+    console.log('Service Registry:', RuntimeDB.SERVICE_REGISTRY_URL);
 } catch (error) {
     console.log('Error', error);
     process.exit(-1);
@@ -46,7 +47,7 @@ app.listen(PORT_NO, (err) => {
     console.log('Prime number checker instance running on port ' + PORT_NO);
 
     // register node
-    ServiceRegistry.registerNode(SERVICE_REGISTRY_URL, NODE_NAME, BASE_URL, PORT_NO)
+    ServiceRegistry.registerNode(RuntimeDB.SERVICE_REGISTRY_URL, RuntimeDB.NODE_NAME, BASE_URL, PORT_NO)
         .then(() => {
             console.log('Node registered successfully!');
             updateRegistry();
@@ -59,9 +60,9 @@ app.listen(PORT_NO, (err) => {
     // continuously fetch the registry for updates
     function updateRegistry() {
         console.log('Updating service registry list...');
-        ServiceRegistry.getAll(SERVICE_REGISTRY_URL).then((data) => {
+        ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((data) => {
             if (data) {
-                SERVICE_REG_LIST = data;
+                RuntimeDB.SERVICE_REG_LIST = data;
             }
         });
     }
