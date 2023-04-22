@@ -53,8 +53,11 @@ app.listen(PORT_NO, (err) => {
             console.log('Node registered successfully!');
             updateRegistry().then(() => {
                 // hold election
-                // TODO: change place later
-                Election.startElection();
+                const THRESHOLD_NODE_LIMIT_TO_START_ELECTION = 3; // change to 6 later
+                let hasLeader = RuntimeDB.SERVICE_REG_LIST.find(el => el.isLeader);
+                if (!hasLeader && RuntimeDB.SERVICE_REG_LIST.length >= THRESHOLD_NODE_LIMIT_TO_START_ELECTION) {
+                    Election.startElection();
+                }
             });
         })
         .catch((err) => {
