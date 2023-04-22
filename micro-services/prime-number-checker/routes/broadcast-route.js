@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Broadcaster = require('../controllers/broadcaster');
+const Election = require('../controllers/election');
 
 // get new loader broadcast
 router.post('/newLeader', (req, res) => {
@@ -13,11 +14,13 @@ router.post('/newLeader', (req, res) => {
     }
 });
 
-router.get('/checkisalive', (req, res) => {
-    res.status(200).send(true);
-    // TODO: modify -> pass the requester node name
-    // TODO: if the requester node is a lower number -> return 200 and start election
-    // TODO: if the requester node is a higher number -> return 200 and wait for it to continue election
+router.get('/checkisalive/:id', (req, res) => {
+    Election.respondIsAlive(req.params.id).then((data) => {
+        res.status(data.status).send(true);
+    }).catch((err) => {
+        // either way the node is alive -> hence returning ok status
+        res.status(200).send(true);
+    });
 });
 
 module.exports = router;

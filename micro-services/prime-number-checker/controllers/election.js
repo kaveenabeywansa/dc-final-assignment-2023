@@ -7,12 +7,13 @@ const RuntimeDB = require('../schema/runtime-schema');
 var Election = function () {
 
     this.startElection = () => {
-        var higherNodeArr = RuntimeDB.SERVICE_REG_LIST.filter(el => el.nodeName > RuntimeDB.NODE_NAME);
+         // filtering out the current leader and get higher nodes
+        var higherNodeArr = RuntimeDB.SERVICE_REG_LIST.filter(el => el.nodeName > RuntimeDB.NODE_NAME && !el.isLeader);
         if (higherNodeArr.length) {
             console.log('Starting election... Higher nodes found:', higherNodeArr.length);
             var promList = [];
             var responseList = [];
-            const url = '/broadcast/checkisalive';
+            const url = '/broadcast/checkisalive/' + RuntimeDB.NODE_NAME;
             higherNodeArr.forEach(elNode => {
                 let nodeEndPointUrl = elNode.ipAddress + ':' + elNode.portNumber + url;
                 let requestItm = HTTP.get(nodeEndPointUrl)
@@ -96,6 +97,20 @@ var Election = function () {
             }).catch((err) => {
                 console.log('Error', err);
             });
+    };
+
+    this.respondIsAlive = (requesterNode) => {
+        return new Promise((resolve, reject) => {
+            if (requesterNode < RuntimeDB.NODE_NAME) {
+                console.log('Re starting election by', RuntimeDB.NODE_NAME);
+                // election starter node is less than self
+                // need to start own election
+                this.startElection();
+            }
+
+            // respond alive anyway
+            resolve({ status: 200, data: true });
+        });
     };
 
 };
