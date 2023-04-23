@@ -4,4 +4,5 @@ module.exports = class RuntimeDB {
     static NODE_NAME;
     static SERVICE_REG_LIST = [];
     static LEADER_NODE_NAME;
+    static IS_ELECTION_RUNNING = false;
 }

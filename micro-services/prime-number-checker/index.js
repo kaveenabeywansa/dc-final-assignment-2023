@@ -53,10 +53,12 @@ app.listen(PORT_NO, (err) => {
             console.log('Node registered successfully!');
             updateRegistry().then(() => {
                 // hold election
-                const THRESHOLD_NODE_LIMIT_TO_START_ELECTION = 3; // change to 6 later
+                const THRESHOLD_NODE_LIMIT_TO_START_ELECTION = 5; // TODO: change to 4 or more later
                 let hasLeader = RuntimeDB.SERVICE_REG_LIST.find(el => el.isLeader);
                 if (!hasLeader && RuntimeDB.SERVICE_REG_LIST.length >= THRESHOLD_NODE_LIMIT_TO_START_ELECTION) {
                     Election.startElection();
+                } else if (hasLeader) {
+                    RuntimeDB.LEADER_NODE_NAME = hasLeader.nodeName;
                 }
             });
         })
@@ -77,5 +79,6 @@ app.listen(PORT_NO, (err) => {
 
     // keep updating the registry
     var updateRegSubscription = setInterval(updateRegistry, 5000);
+    var chkLeaderAliveSubscription = setInterval(Election.checkIsLeaderAlive ,5000);
     // clearInterval(updateRegSubscription); // use this to stop the loop if necessary anywhere
 });

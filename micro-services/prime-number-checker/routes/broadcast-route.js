@@ -23,4 +23,8 @@ router.get('/checkisalive/:id', (req, res) => {
     });
 });
 
+router.get('/checkisalive', (req, res) => {
+    res.status(200).send(true);
+});
+
 module.exports = router;

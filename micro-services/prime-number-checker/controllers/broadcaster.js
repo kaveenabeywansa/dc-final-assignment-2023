@@ -13,10 +13,7 @@ var Broadcaster = function () {
 
         return Promise.all(reqPromList).then((data) => {
             Promise.resolve(data);
-        }).catch((err) => {
-            console.log(err);
-            Promise.reject(err);
-        });
+        })
     };
 
     this.newLeaderUpdate = (reqBody) => {
