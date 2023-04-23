@@ -1,5 +1,6 @@
 const HTTP = require('../helpers/http-client');
 const ServiceRegistry = require('./service-registry');
+const CommonFns = require('../helpers/common-fns');
 const RuntimeDB = require('../schema/runtime-schema');
 
 var Scheduler = function () {
@@ -12,16 +13,15 @@ var Scheduler = function () {
 
         this.assignNodeRoles().then((roleList) => {
             console.log('roleList', roleList);
+            var taskBreakDown = this.taskBreakdown(roleList);
+            console.log('task breakdown', taskBreakDown);
         }).catch((err) => {
-            console.log('Error while scheduling!', err);
+            console.log('Scheduling error:', err);
             return false;
         });
     };
 
     this.assignNodeRoles = () => {
-        // TODO: get the registry list
-        // TODO: split the nodes into roles
-
         return ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((data) => {
             let filteredList = data.filter(el => el.nodeName != RuntimeDB.NODE_NAME);
             // sorting in desc to set roles based on nodename
@@ -43,11 +43,36 @@ var Scheduler = function () {
                 return Promise.resolve(filteredList);
             } else {
                 // need more than 3 nodes to perform the operation
-                return Promise.reject(false);
+                return Promise.reject('Not enough nodes to perform!');
             }
         });
     };
 
+    this.taskBreakdown = (roleList) => {
+        var taskScheduleArr = [];
+        let proposerNodes = roleList.filter(_el => _el.role == 'proposer');
+        let numbersToCheck = CommonFns.getInputNumberList();
+
+        // create schedule for each number in the list
+        numbersToCheck.forEach((_num, checkerIndex) => {
+            taskScheduleArr.push([]);
+            let _floor = 1;
+            let _ceil = Math.ceil(_num / 2);
+            let nodeRange = Math.ceil(_ceil / proposerNodes.length);
+            
+            proposerNodes.forEach((_node, indx) => {
+                nodeFloor = _floor + (indx > 0 ? (nodeRange * indx) : 0);
+                nodeCeil = nodeFloor + nodeRange;
+                nodeCeil = (nodeCeil > _ceil) ? _ceil : nodeCeil;
+                nodeCeil = (indx != (proposerNodes.length - 1)) ? (nodeCeil - 1) : nodeCeil;
+
+                let nodeTask = { ..._node, nodeFloor: nodeFloor, checkerCeil: nodeCeil, numberToCheck: _num };
+                taskScheduleArr[checkerIndex].push(nodeTask);
+            });
+        });
+
+        return taskScheduleArr;
+    };
 };
 
 module.exports = new Scheduler();

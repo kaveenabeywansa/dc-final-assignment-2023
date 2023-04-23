@@ -57,7 +57,6 @@ var Election = function () {
             } else {
                 // winner
                 this.announceSelfAsLeader();
-                RuntimeDB.IS_ELECTION_RUNNING = false;
             }
         });
     };
