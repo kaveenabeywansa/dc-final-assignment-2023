@@ -52,6 +52,18 @@ var Controller = function () {
             }
         });
     };
+
+    // update the learner node
+    this.updateLearnerNode = (reqBody) => {
+        return new Promise((resolve, reject) => {
+            try {
+                ServiceRegistry.updateLearner(reqBody.nodeName);
+                resolve({ status: 200, message: "Successfully Updated!" });
+            } catch (error) {
+                reject({ status: 500, message: "Error: " + error });
+            }
+        });
+    };
 };
 
 module.exports = new Controller();

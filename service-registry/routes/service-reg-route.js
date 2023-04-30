@@ -38,5 +38,14 @@ router.post('/deregister', (req, res) => {
         res.status(err.status).send({ message: err.message });
     });
 });
+// update learner node
+router.post('/updatelearner', (req, res) => {
+    console.log('updating learner node...');
+    Controller.updateLearnerNode(req.body).then((data) => {
+        res.status(data.status).send({ message: data.message });
+    }).catch((err) => {
+        res.status(err.status).send({ message: err.message });
+    });
+});
 
 module.exports = router;

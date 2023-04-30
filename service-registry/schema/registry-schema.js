@@ -11,7 +11,8 @@ module.exports = class ServiceRegistry {
             nodeName: name,
             ipAddress: address,
             portNumber: port,
-            isLeader: false
+            isLeader: false,
+            isLearner: false
         });
     }
 
@@ -29,5 +30,12 @@ module.exports = class ServiceRegistry {
                 this.registry.splice(indx, 1);
             }
         });
+    }
+
+    static updateLearner(nodeName) {
+        this.registry.forEach(elInstance => {
+            elInstance.isLearner = (elInstance.nodeName == nodeName);
+        });
+        return true;
     }
 }

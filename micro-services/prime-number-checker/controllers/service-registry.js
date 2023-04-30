@@ -34,6 +34,16 @@ var ServiceRegistry = function () {
                 return Promise.reject(false);
             });
     };
+
+    this.updateLearnerNode = (registryLocation, nodeName) => {
+        return HTTP.post(registryLocation + '/service-registry/updatelearner', { nodeName: nodeName })
+            .then(data => {
+                if (data && data.status && data.status == 200) {
+                    return Promise.resolve(data.data);
+                }
+                return Promise.reject(false);
+            });
+    };
 };
 
 module.exports = new ServiceRegistry();

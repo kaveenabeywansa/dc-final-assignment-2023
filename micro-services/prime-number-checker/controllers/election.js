@@ -104,7 +104,9 @@ var Election = function () {
         Promise.all(promArr)
             .then(() => {
                 console.log('Election winner announcement complete!');
-                Scheduler.startScheduling();
+                RuntimeDB.LEADER_NODE_NAME = RuntimeDB.NODE_NAME;
+                // Scheduler.startScheduling();
+                setTimeout(Scheduler.startScheduling, 3000);
             }).catch((err) => {
                 if (!err.code) {
                     console.log('Error', err);
@@ -120,7 +122,8 @@ var Election = function () {
                 console.log('Re starting election by', RuntimeDB.NODE_NAME);
                 // election starter node is less than self
                 // need to start own election
-                this.startElection();
+                // this.startElection();
+                setTimeout(this.startElection, 500);
             }
 
             // respond alive anyway
@@ -129,7 +132,7 @@ var Election = function () {
     };
 
     this.checkIsLeaderAlive = () => {
-        console.log('checking is leader alive')
+        // console.log('checking is leader alive')
         if (RuntimeDB.LEADER_NODE_NAME && RuntimeDB.LEADER_NODE_NAME != RuntimeDB.NODE_NAME) {
             let leaderNode = RuntimeDB.SERVICE_REG_LIST.find(_itm => _itm.nodeName == RuntimeDB.LEADER_NODE_NAME);
             if (leaderNode) {
@@ -137,7 +140,8 @@ var Election = function () {
                 HTTP.get(url).catch(error => {
                     if (error.code) {
                         // leader unavailable -> start election
-                        this.startElection();
+                        // this.startElection();
+                        setTimeout(this.startElection, 500);
                     }
                 });
             }

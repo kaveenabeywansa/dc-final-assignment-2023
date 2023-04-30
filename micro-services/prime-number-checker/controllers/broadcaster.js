@@ -1,4 +1,5 @@
 const HTTP = require('../helpers/http-client');
+const ServiceRegistry = require('./service-registry');
 const RuntimeDB = require('../schema/runtime-schema');
 
 var Broadcaster = function () {
@@ -20,6 +21,39 @@ var Broadcaster = function () {
         RuntimeDB.LEADER_NODE_NAME = reqBody.name;
     };
 
+    this.newLearnerNode = (node, count) => {
+        let nodeEndPointUrl = node.ipAddress + ':' + node.portNumber + '/broadcast/task-update-learner';
+        return HTTP.post(nodeEndPointUrl, { proposerCount: count });
+    };
+
+    this.distributeTaskToProposer = (taskObj) => {
+        let nodeEndPointUrl = taskObj.ipAddress + ':' + taskObj.portNumber + '/broadcast/task-proposer';
+        return HTTP.post(nodeEndPointUrl, taskObj);
+    };
+
+    this.sendResultToAcceptor = (acceptorNode, payload) => {
+        console.log('sending result to accepter...');
+        let nodeEndPointUrl = acceptorNode.ipAddress + ':' + acceptorNode.portNumber + '/broadcast/task-accepter';
+        return HTTP.post(nodeEndPointUrl, payload);
+    };
+
+    this.sendResultToLearner = (payload) => {
+        console.log('sending result to learner...');
+        ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((updatedRegList) => {
+            let learnerNode = updatedRegList.find(_itm => _itm.isLearner);
+            let nodeEndPointUrl = learnerNode.ipAddress + ':' + learnerNode.portNumber + '/broadcast/task-learner';
+            HTTP.post(nodeEndPointUrl, payload);
+        });
+    };
+
+    this.finishLearntTask = (payload) => {
+        console.log('sending result to leader...');
+        ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((updatedRegList) => {
+            let leaderNode = updatedRegList.find(_itm => _itm.nodeName == RuntimeDB.LEADER_NODE_NAME);
+            let nodeEndPointUrl = leaderNode.ipAddress + ':' + leaderNode.portNumber + '/broadcast/task-finalized';
+            HTTP.post(nodeEndPointUrl, payload);
+        });
+    };
 };
 
 module.exports = new Broadcaster();
