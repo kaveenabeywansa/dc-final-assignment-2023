@@ -5,6 +5,7 @@ const app = express();
 const BodyParser = require('body-parser');
 const Routes = require('./app-routes');
 const ParamExtractor = require('./helpers/param-extractor');
+const Logger = require('./helpers/logger');
 const ServiceRegistry = require('./controllers/service-registry');
 const Election = require('./controllers/election');
 const RuntimeDB = require('./schema/runtime-schema');
@@ -13,6 +14,7 @@ const RuntimeDB = require('./schema/runtime-schema');
 var PORT_NO = process.env.DEFAULT_PORT_NO;
 var BASE_URL = process.env.BASE_URL;
 RuntimeDB.SERVICE_REGISTRY_URL = process.env.SERVICE_REGISTRY_URL;
+RuntimeDB.SIDE_CAR_LOGGER_URL = process.env.SIDE_CAR_LOGGER_URL;
 
 // global variables
 RuntimeDB.NODE_NAME = ServiceRegistry.generateNodeName();
@@ -28,11 +30,11 @@ try {
         RuntimeDB.SERVICE_REGISTRY_URL = argsList.SERVICE_REGISTRY_URL ? argsList.SERVICE_REGISTRY_URL : RuntimeDB.SERVICE_REGISTRY_URL;
     }
 
-    console.log('Node Name', RuntimeDB.NODE_NAME);
-    console.log('Port No:', PORT_NO);
-    console.log('Service Registry:', RuntimeDB.SERVICE_REGISTRY_URL);
+    Logger.log('Node Name', RuntimeDB.NODE_NAME);
+    Logger.log('Port No:', PORT_NO);
+    Logger.log('Service Registry:', RuntimeDB.SERVICE_REGISTRY_URL);
 } catch (error) {
-    console.log('Error', error);
+    Logger.error('Error', error);
     process.exit(-1);
 }
 
@@ -42,15 +44,15 @@ app.use(cors());
 app.use('/', Routes);
 app.listen(PORT_NO, (err) => {
     if (err) {
-        console.log(err);
+        Logger.error(err);
         process.exit(-1);
     }
-    console.log('Prime number checker instance running on port ' + PORT_NO);
+    Logger.log('Prime number checker instance running on port ' + PORT_NO);
 
     // register node
     ServiceRegistry.registerNode(RuntimeDB.SERVICE_REGISTRY_URL, RuntimeDB.NODE_NAME, BASE_URL, PORT_NO)
         .then(() => {
-            console.log('Node registered successfully!');
+            Logger.log('Node registered successfully!');
             updateRegistry().then(() => {
                 // hold election
                 const THRESHOLD_NODE_LIMIT_TO_START_ELECTION = 6; // TODO: change to 7 or more for demo
@@ -63,13 +65,13 @@ app.listen(PORT_NO, (err) => {
             });
         })
         .catch((err) => {
-            console.log('Error while registering node. Please re-try!');
+            Logger.log('Error while registering node. Please re-try!');
             process.exit(-1);
         });
 
     // continuously fetch the registry for updates
     function updateRegistry() {
-        // console.log('Updating service registry list...');
+        // Logger.log('Updating service registry list...');
         return ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((data) => {
             if (data) {
                 RuntimeDB.SERVICE_REG_LIST = data;

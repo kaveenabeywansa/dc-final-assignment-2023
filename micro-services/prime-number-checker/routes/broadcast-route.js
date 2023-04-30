@@ -3,10 +3,11 @@ const router = express.Router();
 const Broadcaster = require('../controllers/broadcaster');
 const Election = require('../controllers/election');
 const Scheduler = require('../controllers/scheduler');
+const Logger = require('../helpers/logger');
 
 // get new loader broadcast
 router.post('/newLeader', (req, res) => {
-    console.log('updating the leader...');
+    Logger.log('updating the leader...');
     try {
         Broadcaster.newLeaderUpdate(req.body);
         res.status(200).send({ message: 'Leader Updated!' });

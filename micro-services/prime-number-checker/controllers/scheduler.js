@@ -4,6 +4,7 @@ const CommonFns = require('../helpers/common-fns');
 const PrimeSolver = require('../helpers/prime-solver');
 const Broadcaster = require('./broadcaster');
 const RuntimeDB = require('../schema/runtime-schema');
+const Logger = require('../helpers/logger');
 
 var Scheduler = function () {
 
@@ -13,9 +14,9 @@ var Scheduler = function () {
             return;
         }
         this.assignNodeRoles().then((roleList) => {
-            // console.log('roleList', roleList);
+            // Logger.log('roleList', roleList);
             var taskBreakDown = this.taskBreakdown(roleList);
-            // console.log('task breakdown', taskBreakDown);
+            // Logger.log('task breakdown', taskBreakDown);
             RuntimeDB.SCHEDULED_TASK = taskBreakDown;
             RuntimeDB.SCHEDULED_TASK_RUNNING = 0;
             RuntimeDB.ROLE_LIST = roleList;
@@ -23,7 +24,7 @@ var Scheduler = function () {
             // distribute the tasks to nodes
             this.distributeTasks();
         }).catch((err) => {
-            console.log('Scheduling error:', err);
+            Logger.log('Scheduling error:', err);
             return false;
         });
     };
@@ -99,10 +100,10 @@ var Scheduler = function () {
 
         Promise.all(promArray)
             .then(() => {
-                console.log('Schedule distributed!');
+                Logger.log('Schedule distributed!');
             })
             .catch((err) => {
-                console.log('Scheduling error');
+                Logger.error('Scheduling error');
             });
     };
 
@@ -172,12 +173,12 @@ var Scheduler = function () {
     };
 
     this.finalizeTask = (payload) => {
-        console.log('Task finalized!');
+        Logger.log('Task complete!')
         let numbToChk = payload.responses[0].schedule.numberToCheck;
         let isPrime = payload.isPrime;
         let divisibleBy = payload.divisibleBy;
         let msg = numbToChk + ' is ' + (isPrime ? 'a' : 'not a') + ' prime number!' + (!isPrime ? " Divisible by: " + divisibleBy : '');
-        console.log('\x1b[32m' + msg + '\x1b[0m');
+        Logger.output(msg);
 
         RuntimeDB.SCHEDULED_TASK_RUNNING++;
         if (RuntimeDB.SCHEDULED_TASK_RUNNING < RuntimeDB.SCHEDULED_TASK.length) {

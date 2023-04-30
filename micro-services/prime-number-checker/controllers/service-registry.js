@@ -1,4 +1,5 @@
 const HTTP = require('../helpers/http-client');
+const Logger = require('../helpers/logger');
 
 var ServiceRegistry = function () {
 
@@ -30,7 +31,7 @@ var ServiceRegistry = function () {
                 return data;
             })
             .catch(err => {
-                console.log('Error: ', err);
+                Logger.error('Error: ', err);
                 return Promise.reject(false);
             });
     };

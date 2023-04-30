@@ -1,6 +1,7 @@
 const HTTP = require('../helpers/http-client');
 const ServiceRegistry = require('./service-registry');
 const RuntimeDB = require('../schema/runtime-schema');
+const Logger = require('../helpers/logger');
 
 var Broadcaster = function () {
 
@@ -32,13 +33,13 @@ var Broadcaster = function () {
     };
 
     this.sendResultToAcceptor = (acceptorNode, payload) => {
-        console.log('sending result to accepter...');
+        Logger.log('sending result to accepter...');
         let nodeEndPointUrl = acceptorNode.ipAddress + ':' + acceptorNode.portNumber + '/broadcast/task-accepter';
         return HTTP.post(nodeEndPointUrl, payload);
     };
 
     this.sendResultToLearner = (payload) => {
-        console.log('sending result to learner...');
+        Logger.log('sending result to learner...');
         ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((updatedRegList) => {
             let learnerNode = updatedRegList.find(_itm => _itm.isLearner);
             let nodeEndPointUrl = learnerNode.ipAddress + ':' + learnerNode.portNumber + '/broadcast/task-learner';
@@ -47,7 +48,7 @@ var Broadcaster = function () {
     };
 
     this.finishLearntTask = (payload) => {
-        console.log('sending result to leader...');
+        Logger.log('sending result to leader...');
         ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((updatedRegList) => {
             let leaderNode = updatedRegList.find(_itm => _itm.nodeName == RuntimeDB.LEADER_NODE_NAME);
             let nodeEndPointUrl = leaderNode.ipAddress + ':' + leaderNode.portNumber + '/broadcast/task-finalized';

@@ -4,6 +4,7 @@ const Broadcaster = require('./broadcaster');
 const ServiceRegistry = require('./service-registry');
 const Scheduler = require('./scheduler');
 const RuntimeDB = require('../schema/runtime-schema');
+const Logger = require('../helpers/logger');
 
 var Election = function () {
 
@@ -17,7 +18,7 @@ var Election = function () {
         ServiceRegistry.getAll(RuntimeDB.SERVICE_REGISTRY_URL).then((updatedRegList) => {
             var higherNodeArr = updatedRegList.filter(el => el.nodeName > RuntimeDB.NODE_NAME);
             if (higherNodeArr.length) {
-                console.log('Starting election... Higher nodes found:', higherNodeArr.length);
+                Logger.log('Starting election... Higher nodes found:', higherNodeArr.length);
                 var promList = [];
                 var responseList = [];
                 const url = '/broadcast/checkisalive/' + RuntimeDB.NODE_NAME;
@@ -35,11 +36,11 @@ var Election = function () {
                         });
                 });
 
-                console.log('Waiting for election responses...');
+                Logger.log('Waiting for election responses...');
                 Promise.all(promList)
                     .catch((error) => {
                         if (error.code && (error.code == 'EHOSTDOWN' || error.code == 'ETIMEDOUT' || error.code == 'ECONNREFUSED')) {
-                            console.log('Detected crashed node!');
+                            Logger.log('Detected crashed node!');
                         }
                     }).finally(() => {
                         // RuntimeDB.IS_ELECTION_RUNNING = false;
@@ -51,7 +52,7 @@ var Election = function () {
                             return this.announceSelfAsLeader(higherInActNodeList);
                         }
                         // if it comes here, the election is over without winning
-                        console.log('Calling off election...');
+                        Logger.log('Calling off election...');
                         RuntimeDB.IS_ELECTION_RUNNING = false;
                     });
             } else {
@@ -62,7 +63,7 @@ var Election = function () {
     };
 
     this.announceSelfAsLeader = (inActNodeList = false) => {
-        console.log('Elected as the leader!');
+        Logger.log('Elected as the leader!');
         var promArr = [];
 
         // deregister inactive higher nodes if any
@@ -98,18 +99,18 @@ var Election = function () {
                 name: RuntimeDB.NODE_NAME
             };
 
-            return Broadcaster.broadcastAll(dataList, broadcastUrl, broadcastPayload).catch(()=>{console.log('from here')});
+            return Broadcaster.broadcastAll(dataList, broadcastUrl, broadcastPayload).catch(()=>{Logger.error('from here')});
         });
 
         Promise.all(promArr)
             .then(() => {
-                console.log('Election winner announcement complete!');
+                Logger.log('Election winner announcement complete!');
                 RuntimeDB.LEADER_NODE_NAME = RuntimeDB.NODE_NAME;
                 // Scheduler.startScheduling();
                 setTimeout(Scheduler.startScheduling, 3000);
             }).catch((err) => {
                 if (!err.code) {
-                    console.log('Error', err);
+                    Logger.error('Error', err);
                 }
             }).finally(() => {
                 RuntimeDB.IS_ELECTION_RUNNING = false;
@@ -119,7 +120,7 @@ var Election = function () {
     this.respondIsAlive = (requesterNode) => {
         return new Promise((resolve, reject) => {
             if (requesterNode < RuntimeDB.NODE_NAME && RuntimeDB.LEADER_NODE_NAME != RuntimeDB.NODE_NAME) {
-                console.log('Re starting election by', RuntimeDB.NODE_NAME);
+                Logger.log('Re starting election by', RuntimeDB.NODE_NAME);
                 // election starter node is less than self
                 // need to start own election
                 // this.startElection();
@@ -132,7 +133,7 @@ var Election = function () {
     };
 
     this.checkIsLeaderAlive = () => {
-        // console.log('checking is leader alive')
+        // Logger.log('checking is leader alive')
         if (RuntimeDB.LEADER_NODE_NAME && RuntimeDB.LEADER_NODE_NAME != RuntimeDB.NODE_NAME) {
             let leaderNode = RuntimeDB.SERVICE_REG_LIST.find(_itm => _itm.nodeName == RuntimeDB.LEADER_NODE_NAME);
             if (leaderNode) {
