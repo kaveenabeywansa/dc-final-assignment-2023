@@ -177,8 +177,7 @@ var Scheduler = function () {
         let isPrime = payload.isPrime;
         let divisibleBy = payload.divisibleBy;
         let msg = numbToChk + ' is ' + (isPrime ? 'a' : 'not a') + ' prime number!' + (!isPrime ? " Divisible by: " + divisibleBy : '');
-        console.log(msg);
-
+        console.log('\x1b[32m' + msg + '\x1b[0m');
 
         RuntimeDB.SCHEDULED_TASK_RUNNING++;
         if (RuntimeDB.SCHEDULED_TASK_RUNNING < RuntimeDB.SCHEDULED_TASK.length) {
