@@ -124,7 +124,7 @@ var Election = function () {
                 // election starter node is less than self
                 // need to start own election
                 // this.startElection();
-                setTimeout(this.startElection, 500);
+                setTimeout(this.startElection, 100);
             }
 
             // respond alive anyway
@@ -142,7 +142,7 @@ var Election = function () {
                     if (error.code) {
                         // leader unavailable -> start election
                         // this.startElection();
-                        setTimeout(this.startElection, 500);
+                        setTimeout(this.startElection, 100);
                     }
                 });
             }
